@@ -129,7 +129,7 @@ VALIDATION_SPLIT = 0.8                      # 20% for trainnig and 80% for valid
 # VAL_SIZE = TRAIN_SIZE
 
 img_channels = 200
-PATCH_LENGTH = 3                #Patch_size (13*2+1)*(13*2+1)
+PATCH_LENGTH = 5                #Patch_size (13*2+1)*(13*2+1)
 
 data = data_IN.reshape(np.prod(data_IN.shape[:2]),np.prod(data_IN.shape[2:]))
 gt = new_gt_IN.reshape(np.prod(new_gt_IN.shape[:2]),)
