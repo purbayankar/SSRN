@@ -17,6 +17,7 @@ from keras.layers.convolutional import (
 from keras.layers.normalization import BatchNormalization
 from keras.regularizers import l2
 from keras import backend as K
+import keras.backend
 from keras.layers.core import Reshape
 from keras import regularizers
 from keras.layers.merge import add
@@ -310,7 +311,7 @@ def _handle_dim_ordering():
     global CONV_DIM2
     global CONV_DIM3
     global CHANNEL_AXIS
-    if K.image_dim_ordering() == 'tf':
+    if keras.backend.image_dim_ordering() == 'tf':
         CONV_DIM1 = 1
         CONV_DIM2 = 2
         CONV_DIM3 = 3
@@ -350,7 +351,7 @@ class ResnetBuilder(object):
             raise Exception("Input shape should be a tuple (nb_channels, kernel_dim1, kernel_dim2, kernel_dim3)")
 
         # Permute dimension order if necessary
-        if K.image_dim_ordering() == 'tf':
+        if keras.backend.image_dim_ordering() == 'tf':
             input_shape = (input_shape[1], input_shape[2],input_shape[3], input_shape[0])
 
         # Load function from str if needed.
