@@ -16,6 +16,40 @@ from sklearn import metrics, preprocessing
 
 from Utils import zeroPadding, normalization, doPCA, modelStatsRecord, averageAccuracy, ssrn_SS_IN
 
+def Global_attention_block(inputs):
+    shape=keras.backend.int_shape(inputs)
+    x=AveragePooling2D(pool_size=(shape[1],shape[2])) (inputs)
+    x=Conv2D(shape[3],1, padding='same') (x)
+    x=Activation('relu') (x)
+    x=Conv2D(shape[3],1, padding='same') (x)
+    x=Activation('sigmoid') (x)
+    C_A=Multiply()([x,inputs])
+    
+    x=Lambda(lambda x: keras.backend.mean(x,axis=-1,keepdims=True))  (C_A)
+    x=Activation('sigmoid') (x)
+    S_A=Multiply()([x,C_A])
+    return S_A
+
+def Category_attention_block(inputs,classes,k):
+    shape=keras.backend.int_shape(inputs)
+    F=Conv2D(k*classes,1, padding='same') (inputs)
+    F=BatchNormalization() (F)
+    F1=Activation('relu') (F)
+    
+    F2=F1
+    x=GlobalMaxPool2D()(F2)
+    
+    x=Reshape((classes,k)) (x)
+    S=Lambda(lambda x: keras.backend.mean(x,axis=-1,keepdims=False))  (x)
+    
+    x=Reshape((shape[1],shape[2],classes,k)) (F1)
+    x=Lambda(lambda x: keras.backend.mean(x,axis=-1,keepdims=False))  (x)
+    x=Multiply()([S,x])
+    M=Lambda(lambda x: keras.backend.mean(x,axis=-1,keepdims=True))  (x)
+    
+    semantic=Multiply()([inputs,M])
+    return semantic
+
 def indexToAssignment(index_, Row, Col, pad_length):
     new_assign = {}
     for counter, value in enumerate(index_):
@@ -77,9 +111,12 @@ def res4_model_ss():
     conv3d_shape = conv_layer3.shape
     conv_layer3 = Reshape((conv3d_shape[1], conv3d_shape[2], conv3d_shape[3]*conv3d_shape[4]))(conv_layer3)
     conv_layer4 = Conv2D(filters=64, kernel_size=(3,3), activation='relu')(conv_layer3)
+    
+    x = Global_attention_block(conv_layer4)
+    x = Category_attention_block(x, nb_classes, 5)
 
 
-    flatten_layer = Flatten()(conv_layer4)
+    flatten_layer = Flatten()(x)
 
     ## fully connected layers
     dense_layer1 = Dense(units=256, activation='relu')(flatten_layer)
