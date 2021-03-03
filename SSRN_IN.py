@@ -56,14 +56,46 @@ def sampling(proptionVal, groundTruth):              #divide dataset into train 
     np.random.shuffle(test_indices)
     return train_indices, test_indices
     
+# def res4_model_ss():
+#     model_res4 = ssrn_SS_IN.ResnetBuilder.build_resnet_8((1, img_rows, img_cols, img_channels), nb_classes)
+
+#     RMS = RMSprop(lr=0.0003)
+#     # Let's train the model using RMSprop
+#     model_res4.compile(loss='categorical_crossentropy', optimizer=RMS, metrics=['accuracy'])
+
+#     return model_res4
+
 def res4_model_ss():
-    model_res4 = ssrn_SS_IN.ResnetBuilder.build_resnet_8((1, img_rows, img_cols, img_channels), nb_classes)
+    ## input layer
+    input_layer = Input((img_rows, img_cols, img_channels, 1))
 
-    RMS = RMSprop(lr=0.0003)
-    # Let's train the model using RMSprop
-    model_res4.compile(loss='categorical_crossentropy', optimizer=RMS, metrics=['accuracy'])
+    ## convolutional layers
+    conv_layer1 = Conv3D(filters=8, kernel_size=(3, 3, 7), activation='relu')(input_layer)
+    conv_layer2 = Conv3D(filters=16, kernel_size=(3, 3, 5), activation='relu')(conv_layer1)
+    conv_layer3 = Conv3D(filters=32, kernel_size=(3, 3, 3), activation='relu')(conv_layer2)
 
-    return model_res4
+    conv3d_shape = conv_layer3.shape
+    conv_layer3 = Reshape((conv3d_shape[1], conv3d_shape[2], conv3d_shape[3]*conv3d_shape[4]))(conv_layer3)
+    conv_layer4 = Conv2D(filters=64, kernel_size=(3,3), activation='relu')(conv_layer3)
+
+
+    flatten_layer = Flatten()(conv_layer4)
+
+    ## fully connected layers
+    dense_layer1 = Dense(units=256, activation='relu')(flatten_layer)
+    dense_layer1 = Dropout(0.4)(dense_layer1)
+    dense_layer2 = Dense(units=128, activation='relu')(dense_layer1)
+    dense_layer2 = Dropout(0.4)(dense_layer2)
+    output_layer = Dense(units=nb_classes, activation='softmax')(dense_layer2)
+    
+    # define the model with input layer and output layer
+    model = Model(inputs=input_layer, outputs=output_layer)
+    
+    # compiling the model
+    adam = Adam(lr=0.001, decay=1e-06)
+    model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
+
+    return model
 
 mat_data = sio.loadmat('/content/SSRN/datasets/IN/Indian_pines_corrected.mat')
 data_IN = mat_data['indian_pines_corrected']
