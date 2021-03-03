@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io as sio
 from keras.models import Sequential, Model
-from keras.layers import Convolution2D, MaxPooling2D, Conv3D, MaxPooling3D, ZeroPadding3D
+from keras.layers import Convolution2D, MaxPooling2D, Conv3D, MaxPooling3D, ZeroPadding3D, Conv2D, Flatten, Dense, Reshape, BatchNormalization
 from keras.layers import Activation, Dropout, Flatten, Dense, BatchNormalization, Input
 from keras.utils.np_utils import to_categorical
 from sklearn.decomposition import PCA
