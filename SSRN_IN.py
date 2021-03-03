@@ -13,6 +13,7 @@ from keras.regularizers import l2
 import time
 import collections
 from sklearn import metrics, preprocessing
+import keras.backend
 
 from Utils import zeroPadding, normalization, doPCA, modelStatsRecord, averageAccuracy, ssrn_SS_IN
 
