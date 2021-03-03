@@ -405,6 +405,7 @@ class ResnetBuilder(object):
                                             block._keras_shape[CONV_DIM2],
                                             block._keras_shape[CONV_DIM3],),
                                  strides=(1, 1, 1))(block_output)
+        print(pool2.shape)
         flatten1 = Flatten()(pool2)
         drop1 = Dropout(0.5)(flatten1)
         dense = Dense(units=num_outputs, activation="softmax", kernel_initializer="he_normal")(drop1)
