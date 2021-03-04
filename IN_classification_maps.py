@@ -98,7 +98,7 @@ def classification_map(map, groundTruth, dpi, savePath):
     ax.yaxis.set_visible(False)
     fig.add_axes(ax)
 
-    ax.imshow(map, aspect='normal')
+    ax.imshow(map)
     fig.savefig(savePath, dpi = dpi)
 
     return 0
