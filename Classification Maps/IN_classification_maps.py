@@ -9,6 +9,41 @@ from sklearn import metrics, preprocessing
 
 from Utils import zeroPadding, normalization, doPCA, modelStatsRecord, averageAccuracy, ssrn_SS_IN
 
+
+def Global_attention_block(inputs):
+    shape=keras.backend.int_shape(inputs)
+    x=AveragePooling2D(pool_size=(shape[1],shape[2])) (inputs)
+    x=Conv2D(shape[3],1, padding='same') (x)
+    x=Activation('relu') (x)
+    x=Conv2D(shape[3],1, padding='same') (x)
+    x=Activation('sigmoid') (x)
+    C_A=Multiply()([x,inputs])
+    
+    x=Lambda(lambda x: keras.backend.mean(x,axis=-1,keepdims=True))  (C_A)
+    x=Activation('sigmoid') (x)
+    S_A=Multiply()([x,C_A])
+    return S_A
+
+def Category_attention_block(inputs,classes,k):
+    shape=keras.backend.int_shape(inputs)
+    F=Conv2D(k*classes,1, padding='same') (inputs)
+    F=BatchNormalization() (F)
+    F1=Activation('relu') (F)
+    
+    F2=F1
+    x=GlobalMaxPool2D()(F2)
+    
+    x=Reshape((classes,k)) (x)
+    S=Lambda(lambda x: keras.backend.mean(x,axis=-1,keepdims=False))  (x)
+    
+    x=Reshape((shape[1],shape[2],classes,k)) (F1)
+    x=Lambda(lambda x: keras.backend.mean(x,axis=-1,keepdims=False))  (x)
+    x=Multiply()([S,x])
+    M=Lambda(lambda x: keras.backend.mean(x,axis=-1,keepdims=True))  (x)
+    
+    semantic=Multiply()([inputs,M])
+    return semantic
+
 def sampling(proptionVal, groundTruth):              #divide dataset into train and test datasets
     labels_loc = {}
     train = {}
@@ -65,18 +100,55 @@ def classification_map(map, groundTruth, dpi, savePath):
 
     return 0
 
+# def res4_model_ss():
+#     model_res4 = ssrn_SS_IN.ResnetBuilder.build_resnet_8((1, img_rows, img_cols, img_channels), nb_classes)
+
+#     RMS = RMSprop(lr=0.0003)
+#     # Let's train the model using RMSprop
+#     model_res4.compile(loss='categorical_crossentropy', optimizer=RMS, metrics=['accuracy'])
+
+#     return model_res4
+
 def res4_model_ss():
-    model_res4 = ssrn_SS_IN.ResnetBuilder.build_resnet_8((1, img_rows, img_cols, img_channels), nb_classes)
+    ## input layer
+    input_layer = Input((img_rows, img_cols, img_channels, 1))
 
-    RMS = RMSprop(lr=0.0003)
-    # Let's train the model using RMSprop
-    model_res4.compile(loss='categorical_crossentropy', optimizer=RMS, metrics=['accuracy'])
+    ## convolutional layers
+    conv_layer1 = Conv3D(filters=8, kernel_size=(3, 3, 7), activation='relu')(input_layer)
+    conv_layer2 = Conv3D(filters=16, kernel_size=(3, 3, 5), activation='relu')(conv_layer1)
+    conv_layer3 = Conv3D(filters=32, kernel_size=(3, 3, 3), activation='relu')(conv_layer2)
 
-    return model_res4
+    conv3d_shape = conv_layer3.shape
+    conv_layer3 = Reshape((conv3d_shape[1], conv3d_shape[2], conv3d_shape[3]*conv3d_shape[4]))(conv_layer3)
+    conv_layer3_ = Global_attention_block(conv_layer3)
+    conv_layer3_ = Category_attention_block(conv_layer3_, nb_classes, 5)
+    conv_layer4 = Conv2D(filters=64, kernel_size=(3,3), activation='relu')(conv_layer3_)
+    
+    x = Global_attention_block(conv_layer4)
+    x = Category_attention_block(x, nb_classes, 5)
 
-mat_data = sio.loadmat('/home/zilong/SSRN/datasets/IN/Indian_pines_corrected.mat')
+
+    flatten_layer = Flatten()(x)
+
+    ## fully connected layers
+    dense_layer1 = Dense(units=256, activation='relu')(flatten_layer)
+    dense_layer1 = Dropout(0.4)(dense_layer1)
+    dense_layer2 = Dense(units=128, activation='relu')(dense_layer1)
+    dense_layer2 = Dropout(0.4)(dense_layer2)
+    output_layer = Dense(units=nb_classes, activation='softmax')(dense_layer2)
+    
+    # define the model with input layer and output layer
+    model = Model(inputs=input_layer, outputs=output_layer)
+    
+    # compiling the model
+    adam = Adam(lr=0.001, decay=1e-06)
+    model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
+
+    return model
+
+mat_data = sio.loadmat('/content/SSRN/datasets/IN/Indian_pines_corrected.mat')
 data_IN = mat_data['indian_pines_corrected']
-mat_gt = sio.loadmat('/home/zilong/SSRN/datasets/IN/Indian_pines_gt.mat')
+mat_gt = sio.loadmat('/content/SSRN/datasets/IN/Indian_pines_gt.mat')
 gt_IN = mat_gt['indian_pines_gt']
 print (data_IN.shape)
 
@@ -136,7 +208,7 @@ seeds = [1334]
 for index_iter in xrange(ITER):
     print("# %d Iteration" % (index_iter + 1))
 
-    best_weights_RES_path_ss4 = '/home/zilong/SSRN/models/Indian_best_RES_3D_SS4_10_' + str(
+    best_weights_RES_path_ss4 = '/content/SSRN/models/Indian_best_RES_3D_SS4_10_' + str(
         index_iter + 1) + '.hdf5'
 
     np.random.seed(seeds[0])
@@ -228,4 +300,4 @@ for index_iter in xrange(ITER):
 
     y_re = np.reshape(y, (gt_IN.shape[0], gt_IN.shape[1], 3))
 
-    classification_map(y_re, gt_IN, 24, "/home/zilong/SSRN/Cmaps/RES4_SS_IN.png")
+    classification_map(y_re, gt_IN, 24, "/content/SSRN/Cmaps/RES4_SS_IN.png")
