@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import scipy.io as sio
 from keras.utils.np_utils import to_categorical
 from keras.optimizers import Adam, SGD, Adadelta, RMSprop, Nadam
+from keras.layers import *
+import keras.backend
 
 from sklearn import metrics, preprocessing
 
@@ -182,7 +184,7 @@ ALL_SIZE = data_IN.shape[0] * data_IN.shape[1]
 
 img_channels = 200
 VALIDATION_SPLIT = 0.80
-PATCH_LENGTH = 3                #Patch_size (13*2+1)*(13*2+1)
+PATCH_LENGTH = 5                #Patch_size (13*2+1)*(13*2+1)
 
 data = data_IN.reshape(np.prod(data_IN.shape[:2]),np.prod(data_IN.shape[2:]))
 gt = new_gt_IN.reshape(np.prod(new_gt_IN.shape[:2]),)
