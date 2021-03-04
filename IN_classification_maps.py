@@ -6,6 +6,7 @@ from keras.utils.np_utils import to_categorical
 from keras.optimizers import Adam, SGD, Adadelta, RMSprop, Nadam
 from keras.layers import *
 import keras.backend
+from keras.models import Sequential, Model
 
 from sklearn import metrics, preprocessing
 
@@ -159,7 +160,7 @@ new_gt_IN = gt_IN
 batch_size = 16
 nb_classes = 16
 nb_epoch = 200     #400
-img_rows, img_cols = 7, 7         #27, 27
+img_rows, img_cols = 11, 11         #27, 27
 patience = 200
 
 INPUT_DIMENSION_CONV = 200
