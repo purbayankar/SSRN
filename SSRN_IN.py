@@ -112,7 +112,9 @@ def res4_model_ss():
 
     conv3d_shape = conv_layer3.shape
     conv_layer3 = Reshape((conv3d_shape[1], conv3d_shape[2], conv3d_shape[3]*conv3d_shape[4]))(conv_layer3)
-    conv_layer4 = Conv2D(filters=64, kernel_size=(3,3), activation='relu')(conv_layer3)
+    conv_layer3_ = Global_attention_block(conv_layer3)
+    conv_layer3_ = Category_attention_block(conv_layer3_, nb_classes, 5)
+    conv_layer4 = Conv2D(filters=64, kernel_size=(3,3), activation='relu')(conv_layer3_)
     
     x = Global_attention_block(conv_layer4)
     x = Category_attention_block(x, nb_classes, 5)
@@ -161,7 +163,7 @@ VAL_SIZE = 1025
 
 TRAIN_SIZE = 2055
 TEST_SIZE = TOTAL_SIZE - TRAIN_SIZE
-VALIDATION_SPLIT = 0.8                      # 20% for trainnig and 80% for validation and testing
+VALIDATION_SPLIT = 0.9                      # 20% for trainnig and 80% for validation and testing
 # TRAIN_NUM = 10
 # TRAIN_SIZE = TRAIN_NUM * nb_classes
 # TEST_SIZE = TOTAL_SIZE - TRAIN_SIZE
