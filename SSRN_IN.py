@@ -163,7 +163,7 @@ VAL_SIZE = 1025
 
 TRAIN_SIZE = 2055
 TEST_SIZE = TOTAL_SIZE - TRAIN_SIZE
-VALIDATION_SPLIT = 0.9                      # 20% for trainnig and 80% for validation and testing
+VALIDATION_SPLIT = 0.8                      # 20% for trainnig and 80% for validation and testing
 # TRAIN_NUM = 10
 # TRAIN_SIZE = TRAIN_NUM * nb_classes
 # TEST_SIZE = TOTAL_SIZE - TRAIN_SIZE
