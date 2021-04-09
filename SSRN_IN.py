@@ -21,7 +21,9 @@ from Utils import zeroPadding, normalization, doPCA, modelStatsRecord, averageAc
 def Global_attention_block(inputs):
     shape=keras.backend.int_shape(inputs)
     x=AveragePooling2D(pool_size=(shape[1],shape[2])) (inputs)
+    print(x.shape)
     x=Conv2D(shape[3],1, padding='same') (x)
+    print(x.shape)
     x=Activation('relu') (x)
     x=Conv2D(shape[3],1, padding='same') (x)
     x=Activation('sigmoid') (x)
