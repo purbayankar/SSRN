@@ -34,10 +34,10 @@ def Global_attention_block(inputs):
 
 def Category_attention_block(inputs,classes,k):
     shape=keras.backend.int_shape(inputs)
+    print(shape)
     F=Conv2D(k*classes,1, padding='same') (inputs)
     F=BatchNormalization() (F)
     F1=Activation('relu') (F)
-    print(F1.shape)
     
     F2=F1
     x=GlobalMaxPool2D()(F2)
@@ -47,7 +47,7 @@ def Category_attention_block(inputs,classes,k):
     S=Lambda(lambda x: keras.backend.mean(x,axis=-1,keepdims=False))  (x)
     
     x=Reshape((shape[1],shape[2],classes,k)) (F1)
-    print(x.shape)
+    
     x=Lambda(lambda x: keras.backend.mean(x,axis=-1,keepdims=False))  (x)
     x=Multiply()([S,x])
     M=Lambda(lambda x: keras.backend.mean(x,axis=-1,keepdims=True))  (x)
