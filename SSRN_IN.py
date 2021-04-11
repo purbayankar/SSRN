@@ -44,10 +44,11 @@ def Category_attention_block(inputs,classes,k):
     
     x=Reshape((classes,k)) (x)
     S=Lambda(lambda x: keras.backend.mean(x,axis=-1,keepdims=False))  (x)
-    
+    print("Shape of S ",S)
     x=Reshape((shape[1],shape[2],classes,k)) (F1)
-    print(x.shape)
+    
     x=Lambda(lambda x: keras.backend.mean(x,axis=-1,keepdims=False))  (x)
+    print("Shape of x ",x)
     x=Multiply()([S,x])
     M=Lambda(lambda x: keras.backend.mean(x,axis=-1,keepdims=True))  (x)
     
