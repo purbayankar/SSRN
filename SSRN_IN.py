@@ -40,8 +40,10 @@ def Category_attention_block(inputs,classes,k):
     
     F2=F1
     x=GlobalMaxPool2D()(F2)
+    print(x.shape)
     
     x=Reshape((classes,k)) (x)
+    print(x.shape)
     S=Lambda(lambda x: keras.backend.mean(x,axis=-1,keepdims=False))  (x)
     
     x=Reshape((shape[1],shape[2],classes,k)) (F1)
